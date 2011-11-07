@@ -17,3 +17,5 @@ and scripts.
 	
 - Add the attributes to the fields
 	<input data-vf-req="true" ...
+	
+Note: Don't forget to include the jQuery library
