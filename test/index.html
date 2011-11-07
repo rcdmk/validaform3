@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Valida&ccedil;&atilde;o de Formul&aacute;rios</title>
+
+<link href="css/reset.css" rel="stylesheet" type="text/css" />
+<link href="css/style.css" rel="stylesheet" type="text/css" />
+
+<!-- ValidaForm 3.0 -->
+<link href="css/rcdmk-validaform3.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/rcdmk-validaform3.js"></script>
+<!-- ValidaForm 3.0 -->
+
+</head>
+
+<body>
+<h1>Validação de Formulários com ValidaForm 3.0 por RCDMK</h1>
+<p>Uma validação em JavaScript não obstrusiva com base em jQuery usando atributos data.</p>
+
+<form name="formValidaForm" action="index.html" method="post" data-validaform="true">
+    <fieldset>
+    	<div class="vfSumary"></div>
+        <dl>
+            <dt><label for="nome">Nome</label></dt>
+            <dd><input type="text" name="nome" id="nome" size="50" maxlength="50" data-vf-text="o nome" data-vf-req="true" /></dd>
+            
+            <dt><label for="email">E-mail</label></dt>
+            <dd><input type="text" name="email" id="email" size="50" maxlength="50" data-vf-text="o e-mail" data-vf-req="true" data-vf-type="email" /></dd>
+            
+            <dt><label for="telefone">Telefone residencial</label></dt>
+            <dd><input type="text" name="telefone" id="telefone" size="14" maxlength="14" data-vf-text="o telefone residencial" data-vf-req="true" data-vf-size="14" data-vf-allow="[0-9]" data-vf-mask="(##) ####-####" /></dd>
+            
+            <dt><label for="nascimento">Data de nascimento</label></dt>
+            <dd><input type="text" name="nascimento" id="nascimento" size="10" maxlength="10" data-vf-text="a data de nascimento" data-vf-req="true" data-vf-type="date" data-vf-size="10" data-vf-allow="[0-9]" data-vf-mask="##/##/####" /></dd>
+            
+            <dt><label>Sexo</label></dt>
+            <dd>
+            	<fieldset>
+	            	<label for="sexo1"><input type="radio" name="sexo" id="sexo1" data-vf-text="o sexo" data-vf-req="true" /> Masculino</label><br />
+	            	<label for="sexo2"><input type="radio" name="sexo" id="sexo2" /> Feminino</label>
+                </fieldset>
+			</dd>
+            
+            <dt><label for="uf">Estado</label></dt>
+            <dd>
+            	<select name="uf" id="uf" data-vf-text="o estado" data-vf-req="true">
+                	<option value=""></option>
+                    <option value="AM">AM</option>
+                    <option value="AP">AP</option>
+                    <option value="SP">SP</option>
+                    <option value="TO">TO</option>
+                </select>
+			</dd>
+            
+            <dt><label>Alimentação</label></dt>
+            <dd>
+            	<fieldset>
+	            	<label for="alimentacao1"><input type="checkbox" name="alimentacao" id="alimentacao1" data-vf-text="tipos de alimentação" data-vf-req="2" /> Carne branca</label><br />
+	            	<label for="alimentacao2"><input type="checkbox" name="alimentacao" id="alimentacao2" /> Carne vermelha</label><br />
+	            	<label for="alimentacao3"><input type="checkbox" name="alimentacao" id="alimentacao3" /> Frutas</label><br />
+	            	<label for="alimentacao4"><input type="checkbox" name="alimentacao" id="alimentacao4" /> Laticínios</label><br />
+	            	<label for="alimentacao5"><input type="checkbox" name="alimentacao" id="alimentacao5" /> Vegetais</label><br />
+                </fieldset>
+			</dd>
+            
+            <dt><label for="renda">Renda</label></dt>
+            <dd><input type="text" name="renda" id="renda" size="10" maxlength="10" data-vf-text="a sua renda mensal" data-vf-req="true" data-vf-type="money" /></dd>
+        </dl>
+        <button type="submit">Enviar</button> <button type="reset">Limpar</button>
+    </fieldset>
+</form>
+</body>
+</html>
