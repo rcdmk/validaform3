@@ -1,0 +1,44 @@
+.vfMessage, .vfError {
+	margin-left: 10px;
+	padding: 5px 5px 5px 25px;
+	
+	border: solid 1px #666;
+	border-radius: 5px;
+	background: url(../images/error.png) no-repeat 5px center #FFC;
+	
+	font-size: 12px;
+	color: #333;
+	
+	position: relative;
+	display: inline;
+	float: right;
+}
+
+.vfError {
+	border-color: #900;
+	background: url(../images/exclamation.png) no-repeat 5px center #FCC;
+	
+	color: #900;
+}
+
+.vfSumary .vfError,
+.vfSumary .vfMessage {
+	float: none;
+	position: relative;
+	display: block;
+	margin-bottom: 5px;
+}
+
+.vfFieldError {
+	border: solid 1px #900;
+	background-color: #FCC;
+	
+	color: #900;
+}
+
+.vfFieldOK {
+	border: solid 1px #090;
+	background-color: #CFC;
+	
+	color: #090;
+}
