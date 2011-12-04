@@ -334,6 +334,10 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.");
 		if ($this.attr("data-vf-allow")) {
 			return vfAllow(new RegExp($(this).attr("data-vf-allow")), event);
 		}
+		
+		if ($this.prop("type") == "textarea" && $this.attr("maxlength") != "") {
+			return vfLimitTextarea($this, event);
+		}
 	}
 	
 	
@@ -353,12 +357,23 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.");
 	function vfHandleInputs(event) {
 		var e = vfEvent(event);
 		
-		if (e.type == "keypress") {
-			return vfHandleKeyPress.call(this, event);
+		switch(e.type){
+			case "keypress":
+				return vfHandleKeyPress.call(this, event);
+				break;
 			
-		} else {
-			return vfHandleKeyDown.call(this, event);
-		}
+			case "keydown":
+				return vfHandleKeyDown.call(this, event);
+				break;
+			
+			case "keyup":
+			case "blur":
+				var $this = $(this);
+				if ($this.prop("type") == "textarea" && $this.attr("maxlength") != "") {
+					return vfLimitTextarea($this, event);
+				}
+				break;
+		} 
 	}
 	
 	
@@ -438,6 +453,32 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.");
 		return false;
 	}
 	
+	// Supre a falta do attributo maxlength para textareas
+	function vfLimitTextarea(element, event) {
+		// Pega o evento
+		var e = vfEvent(event);
+		
+		// Pega a tecla pressionada
+		var code = vfKeyCode(e);
+		
+		// Se for alguma outra tecla especial, ignora
+		if (vfFilterActionKeys(e)) return true;
+		
+		// Pega as propriedades
+		var maxLength = strNum(element.attr("maxlength"));
+		var textLength = element.val().length;
+		var pass = true;
+		
+		// Testa se já tem o tamanho máximo
+		pass = textLength < maxLength;
+		
+		// Remove o texto excedente
+		element.val(element.val().substring(0, maxLength));
+		
+		e.returnValue = pass;
+		return pass;
+	}
+	
 	
 	// Exibe as mensagens da validação
 	function vfShowMessages(messages, form) {
@@ -505,6 +546,7 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.");
 		var isValid = true;
 		var atIndex = email.lastIndexOf("@");
 		
+		// Se não contiver arroba, sai
 		if (atIndex < 1) {
 			isValid = false;
 			
@@ -554,7 +596,7 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.");
 	$(document).ready(function() {
 		$("form[data-validaform]")
 			.live("submit", vfHandleSubmit)
-			.find("input,textarea")
-				.live("keypress keydown", vfHandleInputs);
+			.find("input:not(:radio,:checkbox),textarea")
+				.on("keypress keydown keyup blur", vfHandleInputs);
 	});
 //})(jQuery);
