@@ -1,5 +1,5 @@
 /**
-* Validação de Formulários ValidaForm 3.0 por RCDMK - rcdemk@rcdmk.com
+* Validação de Formulários ValidaForm 3.0 por RCDMK - rcdmk@rcdmk.com
 * 
 * @date Setembro de 2011
 * @author rcdmk - rcdmk@rcdmk.com
@@ -12,11 +12,11 @@
 * por Mark James, disponível em http://www.famfamfam.com/lab/icons/silk/
 * sob a licença Creative Commons Attribuition 3.0 - http://creativecommons.org/licenses/by/3.0/
 **/
-//(function($){
-// Globals
-VF_TEMPLATE_TEXT = "{-{-text-}-}";
-
-if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.");
+if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp://www.jquery.com");
+(function($){
+	// Globals
+	var VF_TEMPLATE_TEXT = "{-{-text-}-}";
+	var errors = [];
 	
 	/**
 	* #####   UTILIDADES   #####
@@ -97,6 +97,7 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.");
 	
 	/*
 	* Retorna o limite de entrada de texto do campo
+	* @param input: o objeto DOM que representa o campo
 	*/
 	function vfMaxLength(input) {
 		var retorno = strNum($(input).attr("maxlength"));
@@ -108,13 +109,16 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.");
 	
 	/*
 	* Retorna o objeto representando o evento
+	* @param e: o objeto event
 	*/
 	function vfEvent(e) {
 		return (!window.event) ? e : window.event;
 	}
 	
 	/*
-	* Retorna o código da tecla pressionada
+	* Retorna o código da tecla pressionada, dependendo do tipo do evento
+	* da melhor forma para vários navegadores
+	* @param e: o objeto event
 	*/
 	function vfKeyCode(e) {
 		// selecionando a tecla
@@ -122,13 +126,13 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.");
 		var notIE = !window.event;
 		
 		if (e.type == "keypress") {
-			// outros navegadores (para Firefox, somente para teclas de texto)
+			// outros navegadores (para Firefox, somente teclas de texto)
 			if (!e.keyCode) {
 				// Netscape e alguns outros navegadores
 				if (!e.charCode) {
 					code = e.wich;
 					
-				// alguns navegadores (para Firefox, somente para teclas de texto)
+				// alguns navegadores (para Firefox, somente teclas de texto)
 				} else {
 					code = e.charCode;
 				}
@@ -136,13 +140,9 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.");
 			// IE e Firefox (para Firefox, somente teclas que não entram texto como DEL ou TAB)
 			} else {
 				code = e.keyCode;
-				
-				// permite usar Setas ou o Delete, sai
-				//if (notIE && ((code >= 35 && code <= 40) || code == 46)) return 0;
 			}
 			
-			// permite usar TAB, BASCSPACE, ENTER ou ESC
-			//if (code == 8 || code == 9 || code == 13 || code == 27) return 0;
+		// Para outros eventos
 		} else {
 			code = e.wich || e.keyCode;
 		}
@@ -150,7 +150,11 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.");
 		return code;
 	}
 	
-	
+	/*
+	* Permite o uso de teclas especiais
+	* Retorna true se é uma tecla permitida (como CTRL, TAB, etc.),
+	* false em outros casos
+	*/
 	function vfFilterActionKeys(e) {
 		var code = vfKeyCode(e);
 		var notIE = !window.event;
@@ -168,14 +172,19 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.");
 	/*
 	* Restringe a entrada de texto em um campo à uma expressão regular
 	* definida
+	* @param pattern: uma string ou expressão regular para selecionar os
+	* caracteres permitidos
+	* @param event: o objeto evento
 	*/
 	function vfAllow(pattern, event) {
 		// selecionando o evento para internet explorer e outros navegadores
 		var e = vfEvent(event);
 		
-		var code = vfKeyCode(e);
-		
+		// Se não for uma tecla de ação
 		if (vfFilterActionKeys(e)) return true;
+		
+		// pega a tecla pressionada
+		var code = vfKeyCode(e);
 		
 		// Testa a tecla com o padrão passado e retorna
 		var pass = pattern.test(String.fromCharCode(code));
@@ -187,138 +196,350 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.");
 	}
 	
 	
-	// Remove o padrão do texto
+	/*
+	* Remove o padrão do texto
+	* @param text: o texto para ser alterado
+	* @pattern: uma string ou expressão regular para remover do texto
+	*/
 	function vfRemove(text, pattern) {
 		return String(text).replace(pattern, "");
 	}
 	
 	
-	// Funão principal que valida os campos ao enviar o formulário
+	/*
+	* Função principal que valida os campos ao enviar o formulário
+	* @param event: o objeto event
+	*/
 	function vfHandleSubmit(event){
+		// Pega o evento e inicializa a validação
 		var e = vfEvent(event);
 		var pass = true;
-		var errors = [];
+		
+		// Zera os erros
+		errors = [];
 		
 		var $this = $(this);
 		
 		// Impedir validação HTML5
 		if ($this.has("[novalidate]").length != 1) $this.attr("novalidate","novalidate");
 		
-		// Remover mensagens
-		$this.find("div.vfMessage,div.vfError").remove();
+		// Remover mensagens deste formulário
+		$this.find(".vfMessage,.vfError").remove();
 		
 		
-		// ##############
-		// Tratar textos e seleções obrigatórios
-		var inputs = $this.find("input:text[data-vf-req],input:password[data-vf-req],select[data-vf-req],textarea[data-vf-req]");
-		var totalInputs = inputs.length;
+		// ####### data-vf-req #######
+		// Tratar textos obrigatórios
+		var inputs = $this.find("input[data-vf-req]:not([type=radio],[type=checkbox],[type=botton],[type==submit],[type=reset]),textarea[data-vf-req]");
+		vfSimpleRequired(inputs);
 		
-		// Limpar marcas dos campos
-		inputs.removeClass("vfFieldError vfFieldOK");
+		// tratar selects obrigatórios
+		inputs = $this.find("select[data-vf-req]");
+		vfSelectBoxes(inputs);
 		
-		for (var i = 0; i < totalInputs; i++) {
-			var inpt = $(inputs[i]);
-			
-			if (inpt.val() == "" || inpt.val() == null) {
-				pass = false;
-				errors.push({obj: inpt, type: "e", template: "É obrigatório informar " + VF_TEMPLATE_TEXT + "." });
-			}
-		}
-		
-		
-		// ##############
 		// tratar checkboxes e radios obrigatórios
 		inputs = $this.find("input:radio[data-vf-req],input:checkbox[data-vf-req]");
-		totalInputs = inputs.length;
-		
-		// Limpar marcas dos campos
-		inputs.has(".vfFieldError,.vfFieldOK").removeClass("vfFieldError vfFieldOK");
-		
-		// Se houver campos para validar
-		if (totalInputs > 0) {
-			var lastName = "";
-			
-			// Passa por todos
-			for (var i = 0; i < totalInputs; i++) {
-				var inpt = $(inputs[i]); // Pega o campo atual
-				var curName = inpt.attr("name"); // Pega o nome do campo
-				
-				var groupType = inpt.attr("type"); // Pega o tipo do campo
-				var groupPass = 0;
-				var groupReq = (groupType == "checkbox") ? inpt.data("vfReq") || 1 : 1; // Se for checkbox, pode obrigar selecionar mais de 1
-				
-				// Evita passar por um grupo mais de uma vez
-				if (curName != lastName) {
-					// Pega o grupo de campos (checkboxes ou radios)
-					var group = $this.find("input[name=" + curName + "]:" + groupType);
-					var groupLength = group.length;
-					
-					// Conta quantos estão marcados
-					for (var j = 0; j < groupLength; j++) {
-						if ($(group[j]).is(":checked")) groupPass++;
-					}
-					
-					// Se os marcados forem menos do que o necessário
-					if (groupPass < groupReq) {
-						// Gera um erro para o campo
-						pass = false;
-						errors.push({obj: inpt, type: "e", template: "É obrigatório selecionar " + ((groupType == "checkbox") ? "pelo menos " + groupReq + " " : "") + VF_TEMPLATE_TEXT + "." });
-					}
-				}
-				
-				// Marca o nome do campo atual para evitar repetir o grupo
-				lastName = inpt.attr("name");
-			}
-		}
+		vfRadioAndCheckboxes(inputs);
 		
 		
-		// ##############
+		// ####### data-vf-type=email #######
 		// Tratar campos de E-MAIL que ainda não tem erros
 		var inputs = $this.find("input:text[data-vf-type=email],input[type=email]").filter(vfFilterError);
-							
-		var totalInputs = inputs.length;
-		
-		// Limpar marcas dos campos
-		inputs.removeClass("vfFieldOK");
-		
-		for (var i = 0; i < totalInputs; i++) {
-			var inpt = $(inputs[i]);
-			
-			if (!vfValidateEmailChange(inpt)) {
-				pass = false;
-			}
-		}
+		vfEmails(inputs);
 		
 		
-		// ##############
+		// ####### data-vf-type=int #######
+		// Tratar campos de número inteiro que ainda não tem erros
+		var inputs = $this.find("input:text[data-vf-type=int]").filter(vfFilterError);
+		vfIntegers(inputs);
+		
+		
+		// ####### data-vf-type=decimal #######
+		// Tratar campos de número decimal que ainda não tem erros
+		var inputs = $this.find("input[data-vf-type=decimal],input[data-vf-type=float],input[data-vf-type=money]").filter(vfFilterError);
+		vfDecimals(inputs);
+		
+		
+		// ####### data-vf-type=date #######
+		// Tratar campos de data que ainda não tem erros
+		var inputs = $this.find("input[data-vf-type=date]").filter(vfFilterError);
+		vfDate(inputs);
+		
+		
+		
+		
+		// ###### PONTO DE SAÍDA ########
 		// Se não passou, mostra os erros
 		if (!pass) vfShowMessages(errors, $this);
 		
 		e.returnValue = pass;
 		return pass;
-	
 		
-		// valida um campo de e-mail
-		function vfValidateEmailChange(inpt) {
-			if (!vfValidEmail(inpt.val())) {
-				errors.push({obj: inpt, type: "e", template: VF_TEMPLATE_TEXT + " informado é inválido." });
-				return false;
-			}
+		
+		
+		// ######### FUNÇÕES INTERNAS #########
+		
+		// Validação simples de valor obrigatório
+		function vfSimpleRequired(inputs) {
+			var totalInputs = inputs.length;
 			
-			return true;
+			// Limpar marcas dos campos
+			vfCleanStatus(inputs);
+			
+			for (var i = 0; i < totalInputs; i++) {
+				var inpt = $(inputs[i]);
+				
+				if (inpt.val() == "" || inpt.val() == null) {
+					pass = false;
+					errors.push({obj: inpt, type: "e", template: "É obrigatório informar " + VF_TEMPLATE_TEXT + "." });
+				}
+			}
 		}
-	
+
+		// Valida caixas de seleção obrigatórias
+		function vfSelectBoxes(inputs) {
+			totalInputs = inputs.length;
 			
-		// filtra os campos que não tem erros ainda
-		function vfFilterError() {
-			for (var i = 0; i < errors.length; i++) {
-				if (errors[i].obj.get(0) == this) return false;
+			// Limpar marcas dos campos
+			vfCleanStatus(inputs);
+			
+			// Se houver campos para validar
+			if (totalInputs > 0) {
+				// Passa por todos
+				for (var i = 0; i < totalInputs; i++) {
+					var inpt = $(inputs[i]); // Pega o campo atual
+					var req = inpt.data("vfReq") || 1;
+					
+					// se for somente um obrigatório, usa a validação simples
+					var selectedOptions = inpt.find("option[value!='']:selected").length;
+					
+					// Gera um erro para o campo se tem menos itens selecionados que o brigatório
+					if (selectedOptions < req) {
+						pass = false;
+						errors.push({obj: inpt, type: "e", template: "É obrigatório selecionar " + (req > 1 ? "pelo menos " + req : "") + " " + VF_TEMPLATE_TEXT + "." });
+					}
+				}
+			}
+		}
+
+
+		// Valida botões de radio e caixas de marcar obrigatórias
+		function vfRadioAndCheckboxes(inputs) {
+			totalInputs = inputs.length;
+			
+			// Limpar marcas dos campos
+			vfCleanStatus(inputs);
+			
+			// Se houver campos para validar
+			if (totalInputs > 0) {
+				var lastName = "";
+				
+				// Passa por todos
+				for (var i = 0; i < totalInputs; i++) {
+					var inpt = $(inputs[i]); // Pega o campo atual
+					var curName = inpt.attr("name"); // Pega o nome do campo
+					
+					var groupType = inpt.attr("type"); // Pega o tipo do campo
+					var groupPass = 0;
+					var groupReq = (groupType == "checkbox") ? inpt.data("vfReq") || 1 : 1; // Se for checkbox, pode obrigar selecionar mais de 1
+					
+					// Evita passar por um grupo mais de uma vez
+					if (curName != lastName) {
+						// Conta quantos estão marcados
+						groupPass = $this.find("input[name=" + curName + "]:" + groupType + ":checked").length;
+						
+						// Se os marcados forem menos do que o necessário
+						if (groupPass < groupReq) {
+							// Gera um erro para o campo
+							pass = false;
+							errors.push({obj: inpt, type: "e", template: "É obrigatório selecionar " + ((groupType == "checkbox") ? "pelo menos " + groupReq + " " : "") + VF_TEMPLATE_TEXT + "." });
+						}
+					}
+					
+					// Marca o nome do campo atual para evitar repetir o grupo
+					lastName = inpt.attr("name");
+				}
 			}
 			
-			return true;
+		} // Fim da vfHandleSubmit
+
+
+
+
+		// Valida campos de e-mail
+		function vfEmails(inputs) {
+			var totalInputs = inputs.length;
+			
+			// Limpar marcas dos campos
+			vfCleanStatus(inputs);
+			
+			for (var i = 0; i < totalInputs; i++) {
+				var inpt = $(inputs[i]);
+				var value = inpt.val();
+		
+				if (value != "" && value != null) {				
+					if (!vfValidEmail(value)) {
+						pass = false;
+						errors.push({obj: inpt, type: "e", template: VF_TEMPLATE_TEXT + " não é inválido." });	
+					}
+				}
+			}
+		}
+		
+		// Valida campos de número inteiro
+		function vfIntegers(inputs) {
+			var totalInputs = inputs.length;
+			
+			// Limpar marcas dos campos
+			vfCleanStatus(inputs);
+			
+			for (var i = 0; i < totalInputs; i++) {
+				var inpt = $(inputs[i]);
+				var value = inpt.val();
+		
+				if (value != "" && value != null){
+					if (!vfValidInteger(value)) {
+						pass = false;
+						errors.push({obj: inpt, type: "e", template: VF_TEMPLATE_TEXT + " não é válido." });
+					}
+				}
+			}
+		}
+		
+		// Valida campos de número decimal
+		function vfDecimals(inputs) {
+			var totalInputs = inputs.length;
+			
+			// Limpar marcas dos campos
+			vfCleanStatus(inputs);
+			
+			for (var i = 0; i < totalInputs; i++) {
+				var inpt = $(inputs[i]);
+				var value = inpt.val();
+		
+				if (value != "" && value != null){
+					if (!vfValidDecimal(value)) {
+						pass = false;
+						errors.push({obj: inpt, type: "e", template: VF_TEMPLATE_TEXT + " não é válido." });
+					}
+				}
+			}
+		}
+		
+		// Valida campos de data
+		function vfDate(inputs) {
+			var totalInputs = inputs.length;
+			
+			// Limpar marcas dos campos
+			vfCleanStatus(inputs);
+			
+			for (var i = 0; i < totalInputs; i++) {
+				var inpt = $(inputs[i]);
+				var value = inpt.val();
+		
+				if (value != "" && value != null){
+					if (!vfValidDate(value)) {
+						pass = false;
+						errors.push({obj: inpt, type: "e", template: VF_TEMPLATE_TEXT + " não é uma data válida." });
+					}
+				}
+			}
 		}
 	}
 	
+	
+
+	// valida um campo de e-mail ao soltar a tecla
+	function vfValidateEmailChange(inpt) {
+		inpt = $(inpt);
+
+		var value = inpt.val();
+		
+		// Se o e-mail vazio ou valido
+		if (value == "" || value == null || vfValidEmail(value)) {
+			// limpa as mensagens do campo
+			vfCleanStatus(inpt);
+			return true;
+			
+		} else {
+			// marca o campo como errado
+			inpt.addClass("vfFieldError");
+			return false;
+		}
+	}
+
+	// valida um campo de números inteiros ao soltar a tecla
+	function vfValidateIntegersChange(inpt) {
+		inpt = $(inpt);
+		
+		var value = inpt.val();
+		
+		// Se o número é vazio ou válido
+		if (value == "" || value == null || vfValidInteger(value)) {
+			// limpa as mensagens do campo
+			vfCleanStatus(inpt);
+			return true;
+			
+		} else {
+			// marca o campo como errado
+			inpt.addClass("vfFieldError");
+			return false;
+		}
+	}
+
+	// valida um campo de números decimais ao soltar a tecla
+	function vfValidateDecimalsChange(inpt) {
+		inpt = $(inpt);
+		
+		var value = inpt.val();
+		
+		// Se o número é vazio ou válido
+		if (value == "" || value == null || vfValidDecimal(value)) {
+			// limpa as mensagens do campo
+			vfCleanStatus(inpt);
+			return true;
+			
+		} else {
+			// marca o campo como errado
+			inpt.addClass("vfFieldError");
+			return false;
+		}
+	}
+
+	// valida um campo de data ao soltar a tecla
+	function vfValidateDateChange(inpt) {
+		inpt = $(inpt);
+		
+		var value = inpt.val();
+		
+		// Se o número é vazio ou válido
+		if (value == "" || value == null || vfValidDate(value)) {
+			// limpa as mensagens do campo
+			vfCleanStatus(inpt);
+			return true;
+			
+		} else {
+			// marca o campo como errado
+			inpt.addClass("vfFieldError");
+			return false;
+		}
+	}
+	
+	
+	
+	/*
+	* Filtra os campos que não tem erros
+	* Usada como parâmetro para o método .filter() do jQuery
+	*/
+	function vfFilterError() {
+		for (var i = 0; i < errors.length; i++) {
+			if (errors[i].obj.get(0) == this) return false;
+		}
+		
+		return true;
+	}
+	
+	
+	// ####### MANIPULADORES DE EVENTOS ##########
 	
 	// Aplica as restrições ao pressionar teclas (PRESS),
 	// como máscara, restrição de caracteres, etc
@@ -333,6 +554,25 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.");
 		// Campos com restrição de entrada
 		if ($this.attr("data-vf-allow")) {
 			return vfAllow(new RegExp($(this).attr("data-vf-allow")), event);
+		}
+	}
+	
+	
+	// Aplica as restrições ao soltar teclas (UP),
+	// como validação de e-mail
+	function vfHandleKeyUp(event) {
+		var $this = $(this);
+		var dataType = $this.attr("data-vf-type");
+		
+		// Campos com formato de moeda
+		if (dataType == "email" || dataType == "e-mail") {
+			vfValidateEmailChange(this);
+			
+		} else if(dataType == "int" || dataType == "integer") {
+			vfValidateIntegersChange(this);
+			
+		} else if(dataType == "decimal" || dataType == "float" || dataType == "money") {
+			vfValidateDecimalsChange(this);
 		}
 	}
 	
@@ -356,6 +596,8 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.");
 		if (e.type == "keypress") {
 			return vfHandleKeyPress.call(this, event);
 			
+		} else if (e.type == "keyup") {
+			return vfHandleKeyUp.call(this, event);
 		} else {
 			return vfHandleKeyDown.call(this, event);
 		}
@@ -439,8 +681,13 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.");
 	}
 	
 	
+	
+	// ####### EXIBIÇÃO DE MENSAGENS ##########
+	
 	// Exibe as mensagens da validação
 	function vfShowMessages(messages, form) {
+		form = $(form);
+		
 		var totalMessages = messages.length;
 		var sumary = form.find(".vfSumary");
 		
@@ -451,7 +698,7 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.");
 			var template = message.template;
 			
 			// Monta a base da mensagem
-			var messageElement = "<div class=\"" + ((type == "e") ? "vfError" : "vfMessage") + "\" style=\"display:none;\">" + vfApplyMessageTemplate(obj.attr("data-vf-text"), template) + "</div>"
+			var messageElement = "<div data-field=\"" + obj.attr("name") + "\" class=\"" + ((type == "e") ? "vfError" : "vfMessage") + "\" style=\"display:none;\">" + vfApplyMessageTemplate(obj.attr("data-vf-text"), template) + "</div>"
 			
 			// Marca o campo
 			obj.addClass("vfFieldError");
@@ -484,12 +731,21 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.");
 	
 	
 	// Limpa as marcações
-	function vfCleanStatus(field) {
-		var tmp = $(field);
+	function vfCleanStatus(fields) {
+		var tmp = $(fields);
 		
 		tmp.removeClass("vfFieldError vfFieldOK");
+		
+		for(var i = 0; i < tmp.length; i++) {
+			tmpItem = $(tmp[i]);
+			
+			tmpItem.parents("form").find(".vfError[data-field=" + tmpItem.attr("name") + "]");
+		}
 	}
 	
+	
+	
+	// ###### VALIDAÇÃO DE DADOS #######
 	
 	// Valida e-mails
 	/**
@@ -526,16 +782,12 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.");
 				// local começa ou termina com .
 				isValid = false;
 			
-			} else if (new RegExp('\\.\\.').test(localName)) {
-				// local tem pontos consecutivos ..
+			} else if (new RegExp('\\.\\.').test(email)) {
+				// e-mail tem pontos consecutivos ..
 				isValid = false;
 			
 			} else if (!new RegExp('^(?:[A-Za-z0-9]+[\\-\\.]?)+\\.[A-Za-z0-9][A-Za-z0-9]+$').test(domainName)) {
 				// caractere inválido no domínio
-				isValid = false;
-			
-			} else if (new RegExp('\\.\\.').test(domainName)) {
-				// domínio tem pontos consecutivos ..
 				isValid = false;
 			
 			} else if(!new RegExp('^(\\\\.|[A-Za-z0-9!#%&`_=\\/\'*+?^{}|~.-])+').test(localName.replace("\\\\",""))) {
@@ -547,6 +799,50 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.");
 		return isValid;
 	}
 
+	// valida números inteiros (positivos ou negativos)
+	function vfValidInteger(value) {
+		return /^-?[0-9]+$/.test(value);
+	}
+	
+	// valida números com casas decimais
+	function vfValidDecimal(value) {
+		return /^-?(?:[0-9]{1,3}\.?)*[0-9]{1,3}(?:,[0-9]+)?$/.test(value);
+	}
+
+	// valida datas
+	function vfValidDate(value) {
+		var pattern = /^([0-3][0-9])\/([0-1][0-9])\/([0-9]{4})$/;
+		
+		var matchArray = value.match(pattern);
+		
+		// se não estiver no formato de data, retorna false
+		if (matchArray == null) return false; 
+		
+		day = strNum(matchArray[1]);
+		month = strNum(matchArray[2]);
+		year = strNum(matchArray[3]);
+		
+		// se o mês for inválido, retorna false
+		if (month < 1 || month > 12) return false; 
+		
+		// se o dia for inválido, retorna false
+		if (day < 1 || day > 31) return false;
+		
+		// se não for um mês de 31 dias e o dia for 31, retorna false
+		if ((month == 4 || month == 6 || month == 9 || month == 11) && day == 31) return false;
+		
+		// se for fevereiro
+		if (mes == 2) {
+			 // o ano é bissexto?
+			var leap = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
+			
+			// se o dia for maior que 29 ou se o dia for 29 e o ano não for bissexto, retorna false
+			if (day > 29 || (day == 29 && !leap)) return false;
+		}
+		
+		// se chegou até aqui é uma data válida
+		return true;
+	}
 	
 	/**
 	* #####   INICIALIZAÇÃO   #####
@@ -555,6 +851,6 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.");
 		$("form[data-validaform]")
 			.live("submit", vfHandleSubmit)
 			.find("input,textarea")
-				.live("keypress keydown", vfHandleInputs);
+				.live("keypress keydown keyup", vfHandleInputs);
 	});
-//})(jQuery);
+})(jQuery);

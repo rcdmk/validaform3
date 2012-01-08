@@ -17,7 +17,7 @@
 
 <body>
 <h1>Validação de Formulários com ValidaForm 3.0 por RCDMK</h1>
-<p>Uma validação em JavaScript não obstrusiva com base em jQuery usando atributos data.</p>
+<p>Uma validação em JavaScript discreta com base em jQuery usando atributos data.</p>
 
 <form name="formValidaForm" action="index.html" method="post" data-validaform="true">
     <fieldset>
@@ -35,6 +35,9 @@
             <dt><label for="nascimento">Data de nascimento</label></dt>
             <dd><input type="text" name="nascimento" id="nascimento" size="10" maxlength="10" data-vf-text="a data de nascimento" data-vf-req="true" data-vf-type="date" data-vf-size="10" data-vf-allow="[0-9]" data-vf-mask="##/##/####" /></dd>
             
+            <dt><label for="idade">Idade</label></dt>
+            <dd><input type="text" name="idade" id="idade" size="3" maxlength="3" data-vf-text="a idade" data-vf-type="int" data-vf-allow="[0-9]" data-fv-range-min="0" data-vf-range-max="130" /></dd>
+            
             <dt><label>Sexo</label></dt>
             <dd>
             	<fieldset>
@@ -51,6 +54,17 @@
                     <option value="AP">AP</option>
                     <option value="SP">SP</option>
                     <option value="TO">TO</option>
+                </select>
+			</dd>
+            
+            <dt><label for="preferencia">Preferências</label></dt>
+            <dd>
+            	<select name="preferencia" id="preferencia" data-vf-text="suas preferências" data-vf-req="2" size="5" multiple="multiple">
+                    <option value="Cru">Cru</option>
+                    <option value="Cozido">Cozido</option>
+                    <option value="Assado">Assado</option>
+                    <option value="Frito">Frito</option>
+                    <option value="Torrado">Torrado</option>
                 </select>
 			</dd>
             
