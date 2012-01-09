@@ -608,7 +608,7 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 	}
 
 	// valida um campo de data ao soltar a tecla
-	function vfValidateDateChange(inpt) {
+	function vfValidateDatesChange(inpt) {
 		inpt = $(inpt);
 		
 		var value = inpt.val();
@@ -675,6 +675,9 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 			
 		} else if(dataType == "decimal" || dataType == "float" || dataType == "money") {
 			vfValidateDecimalsChange(this);
+			
+		} else if(dataType == "date") {
+			vfValidateDatesChange(this);
 		}
 	}
 	
@@ -921,7 +924,7 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 	function vfValidDate(value) {
 		if (value == "" || value == null) return false;
 		
-		var pattern = /^([0-3][0-9])\/([0-1][0-9])\/([0-9]{4})$/;
+		var pattern = /^([0-3]?[0-9])\/([0-1]?[0-9])\/([0-9]{4})$/;
 		
 		var matchArray = value.match(pattern);
 		
