@@ -61,6 +61,30 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 	}
 	
 	/*
+	* Converte uma string em data
+	*/
+	function strDate(text) {
+		var date = null;
+		
+		if (text && vfValidDate(text)) {
+			var pattern = /^([0-3][0-9])\/([0-1][0-9])\/([0-9]{4})$/;
+		
+			var matchArray = text.match(pattern);
+			
+			// se não estiver no formato de data, retorna false
+			if (matchArray == null) return false; 
+			
+			day = strNum(matchArray[1]);
+			month = strNum(matchArray[2]);
+			year = strNum(matchArray[3]);
+			
+			date = new Date(year, month - 1, day);
+		}
+		
+		return date;
+	}
+	
+	/*
 	* Converte uma string em número
 	*/
 	function strNum(text) {
@@ -233,11 +257,11 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 		vfSimpleRequired(inputs);
 		
 		// tratar selects obrigatórios
-		inputs = $this.find("select[data-vf-req]");
+		var inputs = $this.find("select[data-vf-req]");
 		vfSelectBoxes(inputs);
 		
 		// tratar checkboxes e radios obrigatórios
-		inputs = $this.find("input:radio[data-vf-req],input:checkbox[data-vf-req]");
+		var inputs = $this.find("input:radio[data-vf-req],input:checkbox[data-vf-req]");
 		vfRadioAndCheckboxes(inputs);
 		
 		
@@ -265,6 +289,11 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 		vfDate(inputs);
 		
 		
+		// ####### data-vf-range #######
+		// Tratar campos de número e data com faixa de valores
+		var inputs = $this.find("input[data-vf-type][data-vf-range-min],input[data-vf-type][data-vf-range-max]").filter(vfFilterError);
+		vfRange(inputs);
+		
 		
 		
 		// ###### PONTO DE SAÍDA ########
@@ -282,28 +311,31 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 		function vfSimpleRequired(inputs) {
 			var totalInputs = inputs.length;
 			
-			// Limpar marcas dos campos
-			vfCleanStatus(inputs);
-			
-			for (var i = 0; i < totalInputs; i++) {
-				var inpt = $(inputs[i]);
+			// Se houver campos para validar
+			if (totalInputs > 0) {
+				// Limpar marcas dos campos
+				vfCleanStatus(inputs);
 				
-				if (inpt.val() == "" || inpt.val() == null) {
-					pass = false;
-					errors.push({obj: inpt, type: "e", template: "É obrigatório informar " + VF_TEMPLATE_TEXT + "." });
+				for (var i = 0; i < totalInputs; i++) {
+					var inpt = $(inputs[i]);
+					
+					if (inpt.val() == "" || inpt.val() == null) {
+						pass = false;
+						errors.push({obj: inpt, type: "e", template: "É obrigatório informar " + VF_TEMPLATE_TEXT + "." });
+					}
 				}
 			}
 		}
 
 		// Valida caixas de seleção obrigatórias
 		function vfSelectBoxes(inputs) {
-			totalInputs = inputs.length;
-			
-			// Limpar marcas dos campos
-			vfCleanStatus(inputs);
+			var totalInputs = inputs.length;
 			
 			// Se houver campos para validar
 			if (totalInputs > 0) {
+				// Limpar marcas dos campos
+				vfCleanStatus(inputs);
+				
 				// Passa por todos
 				for (var i = 0; i < totalInputs; i++) {
 					var inpt = $(inputs[i]); // Pega o campo atual
@@ -324,13 +356,13 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 
 		// Valida botões de radio e caixas de marcar obrigatórias
 		function vfRadioAndCheckboxes(inputs) {
-			totalInputs = inputs.length;
-			
-			// Limpar marcas dos campos
-			vfCleanStatus(inputs);
+			var totalInputs = inputs.length;
 			
 			// Se houver campos para validar
 			if (totalInputs > 0) {
+				// Limpar marcas dos campos
+				vfCleanStatus(inputs);
+				
 				var lastName = "";
 				
 				// Passa por todos
@@ -359,9 +391,78 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 					lastName = inpt.attr("name");
 				}
 			}
-			
-		} // Fim da vfHandleSubmit
+		}
 
+			
+		// Valida faixa de valores
+		function vfRange(inputs) {
+			var totalInputs = inputs.length;
+		
+			// Se houver campos para validar
+			if (totalInputs > 0) {
+				// Limpar marcas dos campos
+				vfCleanStatus(inputs);
+				
+				// Passa por todos
+				for (var i = 0; i < totalInputs; i++) {
+					var inpt = $(inputs[i]); // Pega o campo atual
+					var value = inpt.val();
+					
+					// Se tiver valor
+					if (value != "" && value != null) {
+						// Pega o tipo, o mínimo e o máximo da faixa
+						var rangeType = inpt.attr("data-vf-range") || inpt.attr("data-vf-type");
+						var rangeMin = inpt.attr("data-vf-range-min");
+						var rangeMax = inpt.attr("data-vf-range-max");
+						
+						// Se tiver algum valor da faixa
+						if ((rangeMin != null && rangeMin != "") || (rangeMax != null && rangeMax != "")) {
+							var minIsValid, maxIsValid, valueIsValid, minVal, maxVal;
+							
+							// Se for faixa de datas
+							if (rangeType == "date") {
+								minIsValid 		= vfValidDate(rangeMin);
+								maxIsValid 		= vfValidDate(rangeMax);
+								valueIsValid 	= vfValidDate(value);
+								
+								rangeMinVal 	= strDate(rangeMin);
+								rangeMaxVal 	= strDate(rangeMax);
+								value 			= strDate(value);
+							
+							// Se for faixa de números
+							} else {
+								minIsValid 		= vfValidDecimal(rangeMin);
+								maxIsValid 		= vfValidDecimal(rangeMax);
+								valueIsValid 	= vfValidDecimal(value);
+								
+								rangeMinVal 	= strNum(rangeMin);
+								rangeMaxVal		= strNum(rangeMax);
+								value 			= strNum(value);
+							}
+							
+							// Se o valor for válido e tiver pelo menos um limite válido
+							if (valueIsValid && (minIsValid || maxIsValid)) {
+								// Se tiver os dois limites e estiver fora da faixa, cria um erro
+								if (minIsValid && maxIsValid && (value < rangeMinVal || value > rangeMaxVal)) {
+									pass = false;
+									errors.push({obj: inpt, type: "e", template: "O valor d" + VF_TEMPLATE_TEXT + " precisa estar entre " + rangeMin + " e " + rangeMax + "." });
+									
+								// Se só tiver o limite inferior e o valor estiver abaixo, cria o erro
+								} else if (minIsValid && value < rangeMinVal) {
+									pass = false;
+									errors.push({obj: inpt, type: "e", template: "O valor d" + VF_TEMPLATE_TEXT + " precisa ser maior ou igual a " + rangeMin + "." });
+								
+								// Se só tiver o limite superior e o valor estiver acima, cria o erro
+								} else if (maxIsValid && value > rangeMaxVal) {
+									pass = false;
+									errors.push({obj: inpt, type: "e", template: "O valor d" + VF_TEMPLATE_TEXT + " precisa ser menor ou igual a " + rangeMax + "." });
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 
 
 
@@ -399,7 +500,7 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 				if (value != "" && value != null){
 					if (!vfValidInteger(value)) {
 						pass = false;
-						errors.push({obj: inpt, type: "e", template: VF_TEMPLATE_TEXT + " não é válido." });
+						errors.push({obj: inpt, type: "e", template: VF_TEMPLATE_TEXT + " não é um número inteiro válido." });
 					}
 				}
 			}
@@ -419,7 +520,7 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 				if (value != "" && value != null){
 					if (!vfValidDecimal(value)) {
 						pass = false;
-						errors.push({obj: inpt, type: "e", template: VF_TEMPLATE_TEXT + " não é válido." });
+						errors.push({obj: inpt, type: "e", template: VF_TEMPLATE_TEXT + " não é um número válido." });
 					}
 				}
 			}
@@ -444,7 +545,8 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 				}
 			}
 		}
-	}
+		
+	} // Fim da vfHandleSubmit
 	
 	
 
@@ -758,6 +860,8 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 	address format and the domain exists.
 	*/
 	function vfValidEmail(email){
+		if (email == "" || email == null) return false;
+
 		var isValid = true;
 		var atIndex = email.lastIndexOf("@");
 		
@@ -801,16 +905,22 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 
 	// valida números inteiros (positivos ou negativos)
 	function vfValidInteger(value) {
+		if (value == "" || value == null) return false;
+		
 		return /^-?[0-9]+$/.test(value);
 	}
 	
 	// valida números com casas decimais
 	function vfValidDecimal(value) {
+		if (value == "" || value == null) return false;
+
 		return /^-?(?:[0-9]{1,3}\.?)*[0-9]{1,3}(?:,[0-9]+)?$/.test(value);
 	}
 
 	// valida datas
 	function vfValidDate(value) {
+		if (value == "" || value == null) return false;
+		
 		var pattern = /^([0-3][0-9])\/([0-1][0-9])\/([0-9]{4})$/;
 		
 		var matchArray = value.match(pattern);
@@ -832,7 +942,7 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 		if ((month == 4 || month == 6 || month == 9 || month == 11) && day == 31) return false;
 		
 		// se for fevereiro
-		if (mes == 2) {
+		if (month == 2) {
 			 // o ano é bissexto?
 			var leap = (year % 4 == 0 && (year % 100 != 0 || year % 400 == 0));
 			
