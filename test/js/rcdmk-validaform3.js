@@ -67,7 +67,7 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 		var date = null;
 		
 		if (text && vfValidDate(text)) {
-			var pattern = /^([0-3][0-9])\/([0-1][0-9])\/([0-9]{4})$/;
+			var pattern = /^((?:[0-2]?[0-9])|(?:3[0-1]))\/((?:0?[0-9])|(?:1[0-2]))\/([0-9]{4})$/;
 		
 			var matchArray = text.match(pattern);
 			
@@ -924,7 +924,7 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 	function vfValidDate(value) {
 		if (value == "" || value == null) return false;
 		
-		var pattern = /^([0-3]?[0-9])\/([0-1]?[0-9])\/([0-9]{4})$/;
+		var pattern = /^((?:[0-2]?[0-9])|(?:3[0-1]))\/((?:0?[0-9])|(?:1[0-2]))\/([0-9]{4})$/;
 		
 		var matchArray = value.match(pattern);
 		
