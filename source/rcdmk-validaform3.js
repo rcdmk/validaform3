@@ -12,7 +12,7 @@
 * por Mark James, disponível em http://www.famfamfam.com/lab/icons/silk/
 * sob a licença Creative Commons Attribuition 3.0 - http://creativecommons.org/licenses/by/3.0/
 **/
-if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp://www.jquery.com");
+if (jQuery == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp://www.jquery.com");
 (function($){
 	// Globals
 	var VF_TEMPLATE_TEXT = "{-{-text-}-}";
