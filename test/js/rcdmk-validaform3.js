@@ -253,7 +253,7 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 		
 		// ####### data-vf-req #######
 		// Tratar textos obrigatórios
-		var inputs = $this.find("input[data-vf-req]:not([type=radio],[type=checkbox],[type=botton],[type==submit],[type=reset]),textarea[data-vf-req]");
+		var inputs = $this.find("input[data-vf-req]:not([type=radio],[type=checkbox],[type=botton],[type==submit],[type=reset],[type=image]),textarea[data-vf-req]");
 		vfSimpleRequired(inputs);
 		
 		// tratar selects obrigatórios
@@ -273,13 +273,13 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 		
 		// ####### data-vf-type=int #######
 		// Tratar campos de número inteiro que ainda não tem erros
-		var inputs = $this.find("input:text[data-vf-type=int]").filter(vfFilterError);
+		var inputs = $this.find("input:text[data-vf-type=int],input:text[data-vf-type=integer]").filter(vfFilterError);
 		vfIntegers(inputs);
 		
 		
 		// ####### data-vf-type=decimal #######
 		// Tratar campos de número decimal que ainda não tem erros
-		var inputs = $this.find("input[data-vf-type=decimal],input[data-vf-type=float],input[data-vf-type=money]").filter(vfFilterError);
+		var inputs = $this.find("input[data-vf-type=decimal],input[data-vf-type=float],input[data-vf-type=money],input[data-vf-type=number]").filter(vfFilterError);
 		vfDecimals(inputs);
 		
 		
@@ -293,6 +293,9 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 		// Tratar campos de número e data com faixa de valores
 		var inputs = $this.find("input[data-vf-type][data-vf-range-min],input[data-vf-type][data-vf-range-max]").filter(vfFilterError);
 		vfRange(inputs);
+		
+		
+		
 		
 		
 		
@@ -964,6 +967,7 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 		$("form[data-validaform]")
 			.live("submit", vfHandleSubmit)
 			.find("input,textarea")
+				.not("input[type=button],input[type=submit],input[type=image],input[type=reset]")
 				.live("keypress keydown keyup", vfHandleInputs);
 	});
 })(jQuery);
