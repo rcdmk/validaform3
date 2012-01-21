@@ -295,7 +295,10 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 		vfRange(inputs);
 		
 		
-		
+		// ####### data-vf-compare #######
+		// Tratar campos de número e data com faixa de valores
+		var inputs = $this.find("input[data-vf-compare]").filter(vfFilterError);
+		vfCompare(inputs);
 		
 		
 		
@@ -467,23 +470,49 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 			}
 		}
 
+		
+		// Valida comparações de campos
+		function vfCompare(inputs) {
+			var totalInputs = inputs.length;
+			
+			if (totalInputs > 0) {
+				// Limpar marcas dos campos
+				vfCleanStatus(inputs);
+				
+				for (var i = 0; i < totalInputs; i++) {
+					var inpt = $(inputs[i]);
+					var value = inpt.val();
+					
+					var compareTo = $("#" + inpt.attr("data-vf-compare"));
+					
+					if (compareTo.length) {
+						if (value != compareTo.val()) {
+							pass = false;
+							errors.push({obj: inpt, type: "e", template: VF_TEMPLATE_TEXT + " e " + compareTo.attr("data-vf-text") + " não batem." });
+						}
+					}
+				}
+			}
+		}
 
 
 		// Valida campos de e-mail
 		function vfEmails(inputs) {
 			var totalInputs = inputs.length;
 			
-			// Limpar marcas dos campos
-			vfCleanStatus(inputs);
+			if (totalInputs > 0) {
+				// Limpar marcas dos campos
+				vfCleanStatus(inputs);
+				
+				for (var i = 0; i < totalInputs; i++) {
+					var inpt = $(inputs[i]);
+					var value = inpt.val();
 			
-			for (var i = 0; i < totalInputs; i++) {
-				var inpt = $(inputs[i]);
-				var value = inpt.val();
-		
-				if (value != "" && value != null) {				
-					if (!vfValidEmail(value)) {
-						pass = false;
-						errors.push({obj: inpt, type: "e", template: VF_TEMPLATE_TEXT + " não é inválido." });	
+					if (value != "" && value != null) {				
+						if (!vfValidEmail(value)) {
+							pass = false;
+							errors.push({obj: inpt, type: "e", template: VF_TEMPLATE_TEXT + " não é inválido." });	
+						}
 					}
 				}
 			}
@@ -493,17 +522,19 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 		function vfIntegers(inputs) {
 			var totalInputs = inputs.length;
 			
-			// Limpar marcas dos campos
-			vfCleanStatus(inputs);
+			if (totalInputs > 0) {
+				// Limpar marcas dos campos
+				vfCleanStatus(inputs);
+				
+				for (var i = 0; i < totalInputs; i++) {
+					var inpt = $(inputs[i]);
+					var value = inpt.val();
 			
-			for (var i = 0; i < totalInputs; i++) {
-				var inpt = $(inputs[i]);
-				var value = inpt.val();
-		
-				if (value != "" && value != null){
-					if (!vfValidInteger(value)) {
-						pass = false;
-						errors.push({obj: inpt, type: "e", template: VF_TEMPLATE_TEXT + " não é um número inteiro válido." });
+					if (value != "" && value != null){
+						if (!vfValidInteger(value)) {
+							pass = false;
+							errors.push({obj: inpt, type: "e", template: VF_TEMPLATE_TEXT + " não é um número inteiro válido." });
+						}
 					}
 				}
 			}
@@ -513,17 +544,19 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 		function vfDecimals(inputs) {
 			var totalInputs = inputs.length;
 			
-			// Limpar marcas dos campos
-			vfCleanStatus(inputs);
+			if (totalInputs > 0) {
+				// Limpar marcas dos campos
+				vfCleanStatus(inputs);
+				
+				for (var i = 0; i < totalInputs; i++) {
+					var inpt = $(inputs[i]);
+					var value = inpt.val();
 			
-			for (var i = 0; i < totalInputs; i++) {
-				var inpt = $(inputs[i]);
-				var value = inpt.val();
-		
-				if (value != "" && value != null){
-					if (!vfValidDecimal(value)) {
-						pass = false;
-						errors.push({obj: inpt, type: "e", template: VF_TEMPLATE_TEXT + " não é um número válido." });
+					if (value != "" && value != null){
+						if (!vfValidDecimal(value)) {
+							pass = false;
+							errors.push({obj: inpt, type: "e", template: VF_TEMPLATE_TEXT + " não é um número válido." });
+						}
 					}
 				}
 			}
@@ -533,17 +566,19 @@ if ($ != jQuery || $ == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp
 		function vfDate(inputs) {
 			var totalInputs = inputs.length;
 			
-			// Limpar marcas dos campos
-			vfCleanStatus(inputs);
+			if (totalInputs > 0) {
+				// Limpar marcas dos campos
+				vfCleanStatus(inputs);
+				
+				for (var i = 0; i < totalInputs; i++) {
+					var inpt = $(inputs[i]);
+					var value = inpt.val();
 			
-			for (var i = 0; i < totalInputs; i++) {
-				var inpt = $(inputs[i]);
-				var value = inpt.val();
-		
-				if (value != "" && value != null){
-					if (!vfValidDate(value)) {
-						pass = false;
-						errors.push({obj: inpt, type: "e", template: VF_TEMPLATE_TEXT + " não é uma data válida." });
+					if (value != "" && value != null){
+						if (!vfValidDate(value)) {
+							pass = false;
+							errors.push({obj: inpt, type: "e", template: VF_TEMPLATE_TEXT + " não é uma data válida." });
+						}
 					}
 				}
 			}
