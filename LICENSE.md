@@ -1,29 +1,17 @@
-LICENÇA
-	Creative Commons License
-	CC - BY
-	http://www.creativecommons.org/licenses/by/3.0/
-	
-	PT-BR
-		Livre para:
-			- copiar, compartilhar, distribuir e transmitir o trabalho.
-			- adaptar o trabalho.
+#The MIT License (MIT)
+Copyright (c) 2012 RCDMK - rcdmk@rcdmk.com
 
-		Sobre as condições:
-	 		- Atribuição: Você precisa atribuir o trabalho da mesma maneira especificada pelo autor ou licenciador (mas não de uma maneira que sugira que estes endoçam você ou o seu uso do trabalho).
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+and associated documentation files (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-		Atribuição do autor:
-			- Você deve manter esta licença com o código fonte da aplicação ou incluí-la no cabeçalho do código fonte deste trabalho;
-			- Se a aplicação não é distribuída somente como o código fonte, você deve adicionar uma referência ou nota citando o autor e o trabalho de base em qualquer tela ou diálogo de "Sobre" na forma binária da aplicação.
-		
-	EN
-		You are free:
-			- to copy, share, distribute and transmit the work.
-			- to adapt the work.
+The above copyright notice and this permission notice shall be included in all copies or
+substantial portions of the Software.
 
-		Under the following conditions:
-			- Attribution: You must attribute the work in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work). 
-			
-		Author attribution:
-			- You have to keep this licence with the source code of the application or embedded in the header of the source file;
-			- If the application is not distributed only in source form, you have to add a reference or note citing the author and the based work in any about screen or dialog in the binary distribution
-
+**THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.**
