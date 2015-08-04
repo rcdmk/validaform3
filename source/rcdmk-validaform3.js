@@ -21,6 +21,8 @@
 **/
 if (jQuery == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp://www.jquery.com");
 (function($){
+	'use strict';
+	
 	// Globals
 	var VF_TEMPLATE_TEXT = "{-{-text-}-}";
 	var errors = [];
@@ -294,6 +296,12 @@ if (jQuery == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp://www.jqu
 		// Tratar campos de data que ainda não tem erros
 		var inputs = $this.find("input[data-vf-type=date]").filter(vfFilterError);
 		vfDate(inputs);
+		
+		
+		// ####### data-vf-type=cpf #######
+		// Tratar campos de CPF que ainda não tem erros
+		var inputs = $this.find("input[data-vf-type=cpf]").filter(vfFilterError);
+		vfCPF(inputs);
 		
 		
 		// ####### data-vf-range #######
@@ -591,6 +599,28 @@ if (jQuery == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp://www.jqu
 			}
 		}
 		
+		// Valida campos de CPF
+		function vfCPF(inputs) {
+			var totalInputs = inputs.length;
+			
+			if (totalInputs > 0) {
+				// Limpar marcas dos campos
+				vfCleanStatus(inputs);
+				
+				for (var i = 0; i < totalInputs; i++) {
+					var inpt = $(inputs[i]);
+					var value = inpt.val();
+			
+					if (value != "" && value != null){
+						if (!vfValidCPF(value)) {
+							pass = false;
+							errors.push({obj: inpt, type: "e", template: VF_TEMPLATE_TEXT + " não é um CPF válido." });
+						}
+					}
+				}
+			}
+		}
+		
 	} // Fim da vfHandleSubmit
 	
 	
@@ -670,6 +700,25 @@ if (jQuery == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp://www.jqu
 			return false;
 		}
 	}
+
+	// valida um campo de CPF ao soltar a tecla
+	function vfValidateCPFsChange(inpt) {
+		inpt = $(inpt);
+		
+		var value = inpt.val();
+		
+		// Se o número é vazio ou válido
+		if (value == "" || value == null || vfValidCPF(value)) {
+			// limpa as mensagens do campo
+			vfCleanStatus(inpt);
+			return true;
+			
+		} else {
+			// marca o campo como errado
+			inpt.addClass("vfFieldError");
+			return false;
+		}
+	}
 	
 	
 	
@@ -723,6 +772,9 @@ if (jQuery == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp://www.jqu
 			
 		} else if(dataType == "date") {
 			vfValidateDatesChange(this);
+			
+		} else if(dataType == "cpf") {
+			vfValidateCPFsChange(this);
 		}
 	}
 	
@@ -883,6 +935,7 @@ if (jQuery == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp://www.jqu
 	// Limpa as marcações
 	function vfCleanStatus(fields) {
 		var tmp = $(fields);
+		var tmpItem;
 		
 		tmp.removeClass("vfFieldError vfFieldOK");
 		
@@ -1000,6 +1053,75 @@ if (jQuery == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp://www.jqu
 		
 		// se chegou até aqui é uma data válida
 		return true;
+	}
+	
+	// valida CPFs
+	function vfValidCPF(value) {
+		if (!value) return false;
+		
+		// remove não numéricos
+		value = value.replace(/\D/ig, "");
+		
+		var numbers = new Array(12);
+		var multiplier, sum, firstVN, secondVN;
+		
+		// se não tiver o tamanho de um CPF então é inválido
+		if (value.length != 11) {
+			return false;
+			
+		// se for uma sequência de números repetidos então é inválido
+		} else if (value == "00000000000" || value == "11111111111" || value == "22222222222" || value == "33333333333" || value == "44444444444" 
+				|| value == "55555555555" || value == "66666666666" || value == "77777777777" || value == "88888888888" || value == "99999999999") {
+			return false;
+			
+		// se não, executa a validação completa (mod 11)
+		} else {
+			// converte em um array de 12 posições (a primeira é apenas para facilitar o raciocínio)
+			numbers = (" " + value).split("");
+			
+			multiplier = 10;
+			sum = 0;
+			
+			for (var i = 1; i < 10; i++) {
+				sum += (multiplier * numbers[i]);
+				multiplier--;
+			}
+			
+			sum = sum % 11;
+				
+			if (sum < 2) {
+				firstVN = 0;
+			} else {
+				firstVN = 11 - sum;
+			}
+
+			if (firstVN == numbers[10]) {
+				multiplier = 11;
+				sum = 0;
+				
+				for (var i = 1; i < 11; i++) {
+					sum += (multiplier * numbers[i]);
+					multiplier--;
+				}
+				
+				sum = sum % 11;
+				
+				if (sum < 2) {
+					secondVN = 0;
+				} else {
+					secondVN = 11 - sum;
+				}
+			
+				if (secondVN == numbers[11]) {
+					// CPF Válido;
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}
 	}
 	
 	/**
