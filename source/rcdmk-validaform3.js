@@ -304,6 +304,12 @@ if (jQuery == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp://www.jqu
 		vfCPF(inputs);
 		
 		
+		// ####### data-vf-type=cnpj #######
+		// Tratar campos de CNPJ que ainda não tem erros
+		var inputs = $this.find("input[data-vf-type=cnpj]").filter(vfFilterError);
+		vfCNPJ(inputs);
+		
+		
 		// ####### data-vf-range #######
 		// Tratar campos de número e data com faixa de valores
 		var inputs = $this.find("input[data-vf-type][data-vf-range-min],input[data-vf-type][data-vf-range-max]").filter(vfFilterError);
@@ -621,6 +627,28 @@ if (jQuery == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp://www.jqu
 			}
 		}
 		
+		// Valida campos de CNPJ
+		function vfCNPJ(inputs) {
+			var totalInputs = inputs.length;
+			
+			if (totalInputs > 0) {
+				// Limpar marcas dos campos
+				vfCleanStatus(inputs);
+				
+				for (var i = 0; i < totalInputs; i++) {
+					var inpt = $(inputs[i]);
+					var value = inpt.val();
+			
+					if (value != "" && value != null){
+						if (!vfValidCNPJ(value)) {
+							pass = false;
+							errors.push({obj: inpt, type: "e", template: VF_TEMPLATE_TEXT + " não é um CNPJ válido." });
+						}
+					}
+				}
+			}
+		}
+		
 	} // Fim da vfHandleSubmit
 	
 	
@@ -719,6 +747,25 @@ if (jQuery == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp://www.jqu
 			return false;
 		}
 	}
+
+	// valida um campo de CNPJ ao soltar a tecla
+	function vfValidateCNPJsChange(inpt) {
+		inpt = $(inpt);
+		
+		var value = inpt.val();
+		
+		// Se o número é vazio ou válido
+		if (value == "" || value == null || vfValidCNPJ(value)) {
+			// limpa as mensagens do campo
+			vfCleanStatus(inpt);
+			return true;
+			
+		} else {
+			// marca o campo como errado
+			inpt.addClass("vfFieldError");
+			return false;
+		}
+	}
 	
 	
 	
@@ -775,6 +822,9 @@ if (jQuery == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp://www.jqu
 			
 		} else if(dataType == "cpf") {
 			vfValidateCPFsChange(this);
+
+		} else if(dataType == "cnpj") {
+			vfValidateCNPJsChange(this);
 		}
 	}
 	
@@ -1062,8 +1112,7 @@ if (jQuery == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp://www.jqu
 		// remove não numéricos
 		value = value.replace(/\D/ig, "");
 		
-		var numbers = new Array(12);
-		var multiplier, sum, firstVN, secondVN;
+		var numbers, multiplier, sum, firstVN, secondVN;
 		
 		// se não tiver o tamanho de um CPF então é inválido
 		if (value.length != 11) {
@@ -1113,6 +1162,76 @@ if (jQuery == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp://www.jqu
 				}
 			
 				if (secondVN == numbers[11]) {
+					// CPF Válido;
+					return true;
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}
+	}
+	
+	// valida CNPJs
+	function vfValidCNPJ(value) {
+		if (!value) return false;
+		
+		// remove não numéricos
+		value = value.replace(/\D/ig, "");
+		
+		var numbers, multiplier, sum, firstVN, secondVN;
+		
+		// se não tiver o tamanho de um CNPJ então é inválido
+		if (value.length != 14) {
+			return false;
+			
+		// se for uma sequência de números repetidos então é inválido
+		} else if (value == "00000000000000" || value == "11111111111111" || value == "22222222222222" || value == "33333333333333" || value == "44444444444444" 
+				|| value == "55555555555555" || value == "66666666666666" || value == "77777777777777" || value == "88888888888888" || value == "99999999999999") {
+			return false;
+			
+		// se não, executa a validação completa (mod 11)
+		} else {
+			// converte em um array de 15 posições (a primeira é apenas para facilitar o raciocínio)
+			numbers = (" " + value).split("");
+			
+			multiplier = 5;
+			sum = 0;
+			
+			for (var i = 1; i < 13; i++) {
+				sum += (multiplier * numbers[i]);
+				multiplier--;
+				if (multiplier < 2) multiplier = 9;
+			}
+			
+			sum = sum % 11;
+				
+			if (sum < 2) {
+				firstVN = 0;
+			} else {
+				firstVN = 11 - sum;
+			}
+
+			if (firstVN == numbers[13]) {
+				multiplier = 6;
+				sum = 0;
+				
+				for (var i = 1; i < 14; i++) {
+					sum += (multiplier * numbers[i]);
+					multiplier--;
+					if (multiplier < 2) multiplier = 9;
+				}
+				
+				sum = sum % 11;
+				
+				if (sum < 2) {
+					secondVN = 0;
+				} else {
+					secondVN = 11 - sum;
+				}
+			
+				if (secondVN == numbers[14]) {
 					// CPF Válido;
 					return true;
 				} else {
