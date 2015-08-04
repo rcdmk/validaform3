@@ -87,7 +87,7 @@ _An integer greater then zero._
 ###`data-vf-type`:
 
 Specify the data type of the field, validating by its format.  
-Used by other validations like range to specify the type of range.  
+Used by other validations like range to specify the type of range (except `CPF` and `CNPJ`).  
 Some of these also impose a formating when typing like `money`. Other just restrict the input like `int`.
 
 **Accepts:**
@@ -106,6 +106,12 @@ Validate the format of integer string numbers like `1005`, `1.005` or `-1005`.
 
 _`email`: e-mail format_  
 Validate the format of the eletronic address with a complex _regular expression_  
+
+_`cpf`: CPF format_  
+Validate the format of the CPF number validating the checking digits  
+
+_`cnpj`: CNPJ format_  
+Validate the format of the CNPJ number validating the checking digits  
 
 >**Note:** I know that many of you can realise that this can't guaranty that the e-mail is really valid, but it's always good to advice that this script only validates the format and don't check if the e-mail really exists.
 
