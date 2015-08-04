@@ -1,8 +1,8 @@
 /**
-* Validação de Formulários ValidaForm 3.0 por RCDMK - rcdmk@rcdmk.com
+* Validação de Formulários ValidaForm 3.0 por RCDMK - rcdmk[at]hotmail[dot]com
 * 
 * The MIT License (MIT)
-* Copyright (c) 2012 RCDMK - rcdmk@rcdmk.com
+* Copyright (c) 2012 RCDMK - rcdmk[at]hotmail[dot]com
 * 
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
 * and associated documentation files (the "Software"), to deal in the Software without restriction,
