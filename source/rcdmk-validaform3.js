@@ -1006,10 +1006,8 @@ if (jQuery == undefined) alert("É obrigatório o uso de jQuery.\n\nhttp://www.jqu
 	* #####   INICIALIZAÇÃO   #####
 	**/
 	$(document).ready(function() {
-		$("form[data-validaform]")
-			.live("submit", vfHandleSubmit)
-			.find("input,textarea")
-				.not("input[type=button],input[type=submit],input[type=image],input[type=reset]")
-				.live("keypress keydown keyup", vfHandleInputs);
+		$(document)
+			.on("submit", "form[data-validaform]", vfHandleSubmit)
+			.on("keypress keydown keyup", "input:not(input[type=button],input[type=submit],input[type=image],input[type=reset]),textarea", vfHandleInputs);
 	});
 })(jQuery);
